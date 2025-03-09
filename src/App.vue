@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Parser } from "node-sql-parser";
 import { ref } from "vue";
+import { maxcomputeToHive } from "./util.js";
 
 const initialValue = `
 -- 定义变量
@@ -20,14 +21,18 @@ VALUES (@course_name, @teacher_name);
 `;
 
 const value = ref(initialValue);
+const convertedSql = ref("");
 const onInput = (e: any) => {
 	value.value = e.target.value;
 };
 
 const check = () => {
+	// console.log(value.value);
 	const parser = new Parser();
 	try {
-		parser.astify(value.value);
+		convertedSql.value = maxcomputeToHive(value.value);
+		console.log(convertedSql.value);
+		parser.astify(convertedSql.value, { database: "hive" });
 		window.alert("Success");
 	} catch (error) {
 		window.alert("Check Error");
@@ -40,6 +45,11 @@ const check = () => {
 	<textarea :value="initialValue" @input="onInput" class="sql-textarea"></textarea>
 	<br />
 	<button @click="check">测试</button>
+
+	<!-- <div>
+		<h3>转换后的 SQL</h3>
+		<div class="convert-sql">{{ convertedSql }}</div>
+	</div> -->
 </template>
 
 <style scoped>
